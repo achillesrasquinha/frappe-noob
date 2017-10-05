@@ -1,4 +1,5 @@
 #!/usr/bin/python
+
 # imports - compatibility imports
 from __future__ import print_function
 
@@ -56,7 +57,7 @@ def main(args = None):
 	popen(brew, 'install', *const.HOMEBREW_DEPENDENCIES)
 
 	pip   = which('pip2', raise_err = True)
-	popen(pip, 'install', 'https://github.com/frappe/bench/archive/master.zip'.format(github = const.URL_BENCH))
+	popen(pip, 'install', '{url}/archive/master.zip'.format(url = const.URL_BENCH))
 
 	return code
 
