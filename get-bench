@@ -1,4 +1,7 @@
 #!/usr/bin/python
+# imports - compatibility imports
+from __future__ import print_function
+
 # imports - standard imports
 import sys, os
 import subprocess
@@ -18,16 +21,23 @@ def which(executable, raise_err = False):
 	path = find_executable(executable)
 
 	if not path and raise_err:
-		raise ValueError('{executable} not found.'.format(path))
+		raise ValueError('{executable} not found.'.format(executable = executable))
 	
 	return path
 
 def popen(*params, **kwargs):
-	raise_err  = kwargs.get('raise_err')
+	output     = kwargs.get('output', True)
+	raise_err  = kwargs.get('raise_err', False)
+	
 	proc       = subprocess.Popen(params,
 		stdin  = subprocess.PIPE,
 		stdout = subprocess.PIPE,
-		stderr = subprocess.PIPE)
+		stderr = subprocess.PIPE
+	)
+
+	if output:
+		for line in iter(proc.stdout.readline, ""):
+			print(line, end = '')
 	
 	out, err   = proc.communicate()
 
@@ -36,17 +46,17 @@ def popen(*params, **kwargs):
 def main(args = None):
 	code  = os.EX_OK
 
-	curl  = which('curl',  raise_err = True)
-	ruby  = which('ruby',  raise_err = True)
+	curl  = which('curl', raise_err = True)
+	ruby  = which('ruby', raise_err = True)
 	
-	pout  = popen(curl, const.URL_HOMEBREW_INSTALL)
+	pout  = popen(curl, const.URL_HOMEBREW_INSTALL, output = False)
 	popen(ruby, '-e', pout)
 
-	brew  = which('brew',  raise_err = True)
+	brew  = which('brew', raise_err = True)
 	popen(brew, 'install', *const.HOMEBREW_DEPENDENCIES)
 
-	pip   = which('pip',   raise_err = True)
-	popen(pip, 'install', '-e', 'git+{github}#egg=frappe-bench'.format(github = const.URL_BENCH))
+	pip   = which('pip2', raise_err = True)
+	popen(pip, 'install', 'https://github.com/frappe/bench/archive/master.zip'.format(github = const.URL_BENCH))
 
 	return code
 
